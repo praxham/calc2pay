@@ -1,20 +1,17 @@
 import QRCode from "react-qr-code";
 
 const PaymentQR = ({ amount, upiId, onClose }) => {
-  // Add formatting function
   const formatIndianNumber = (number) => {
     const numStr = number.toString();
     const parts = numStr.split(".");
     let integerPart = parts[0];
     const decimalPart = parts[1] ? "." + parts[1] : "";
 
-    // Handle negative numbers
     const isNegative = integerPart.startsWith("-");
     if (isNegative) {
       integerPart = integerPart.slice(1);
     }
 
-    // Add commas for Indian number system
     let formattedInteger = integerPart;
     if (integerPart.length > 3) {
       const last3Digits = integerPart.slice(-3);
@@ -28,10 +25,8 @@ const PaymentQR = ({ amount, upiId, onClose }) => {
     return `${isNegative ? "-" : ""}${formattedInteger}${decimalPart}`;
   };
 
-  // Create UPI payment link
   const upiLink = `upi://pay?pa=${upiId}&am=${amount}&cu=INR`;
 
-  // Share payment link functionality
   const handleShare = async () => {
     const shareData = {
       title: "UPI Payment",
@@ -39,14 +34,12 @@ const PaymentQR = ({ amount, upiId, onClose }) => {
     };
   
     if (navigator.share) {
-      // Use the Web Share API if available
       try {
         await navigator.share(shareData);
       } catch (err) {
         console.error("Error sharing:", err);
       }
     } else {
-      // Fallback for devices/browsers that don't support Web Share API
       navigator.clipboard.writeText(upiLink).then(() => {
         alert("Payment link copied to clipboard! You can share it manually.");
       });
