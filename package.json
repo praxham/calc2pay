@@ -9,13 +9,17 @@
     "start": "NODE_ENV=production bun src/index.tsx"
   },
   "dependencies": {
+    "bun-plugin-tailwind": "latest",
+    "crypto-js": "^4.2.0",
     "react": "^19",
     "react-dom": "^19",
+    "react-router-dom": "^7.18.4",
     "tailwindcss": "^4",
-    "bun-plugin-tailwind": "latest"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/crypto-js": "^4.2.2",
     "@types/react": "^19",
     "@types/react-dom": "^19"
   }
