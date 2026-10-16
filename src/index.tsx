@@ -2,6 +2,8 @@ import { serve } from "bun";
 import index from "./index.html";
 
 const server = serve({
+  hostname: "0.0.0.0", // <-- Add this line to allow external proxy traffic
+  port: 3000,
   routes: {
     // Serve index.html for all unmatched routes.
     "/*": index,
@@ -21,7 +23,7 @@ const server = serve({
       },
     },
 
-    "/api/hello/:name": async req => {
+    "/api/hello/:name": async (req) => {
       const name = req.params.name;
       return Response.json({
         message: `Hello, ${name}!`,
