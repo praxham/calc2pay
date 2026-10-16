@@ -1,28 +1,20 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import StyledButton from "./common/StyledButton";
-import { useBillStore } from "@/store";
+import { useBillStore, useUPIIdStore } from "@/store";
 import type { bill } from "@/types";
+import UPIPaymentPopup from "./UPIPaymentPopup";
 
 const Caclulator = () => {
   const [equation, setEquation] = useState("");
+  const upiId = useUPIIdStore((state) => state.upiId);
   const addBill = useBillStore((state) => state.addBill);
-  const bills = useBillStore((state) => state.bills);
-  console.log({ bills });
-
+  const [totalPaymentAmount, setTotalPaymentAmount] = useState(0);
   return (
-    <div className="md:min-w-[20vw] mt-auto text-2xl font-semibold flex flex-col gap-4">
+    <div className="md:min-w-[20vw] h-full mt-auto text-2xl font-semibold flex flex-col gap-4">
       <textarea
         defaultValue={equation}
-        className="w-full   text-[3rem] px-4 py-2 rounded-(--corner-radius) border-(--clr-border-grey-two) border"
+        className="w-full h-full text-[3rem] px-4 py-2 rounded-(--corner-radius) border border-(--clr-grey-three)"
       />
-      {bills.length > 0 && (
-        <a
-          className="ml-auto w-fit py-1 px-2 bg-(--clr-grey-one) rounded-(--corner-radius) text-[0.87rem]"
-          href="/transactions"
-        >
-          View Transactions
-        </a>
-      )}
       <div className="grid grid-cols-4 gap-1">
         {buttons.map((key) => (
           <StyledButton
@@ -34,7 +26,12 @@ const Caclulator = () => {
               } else if (key === "⌫") {
                 backspace(setEquation);
               } else if (key === "=") {
-                calculate(equation, setEquation, addBill);
+                calculate(
+                  equation,
+                  setEquation,
+                  addBill,
+                  setTotalPaymentAmount,
+                );
               } else if (key === "( )") {
                 if (equation.includes("(")) {
                   setEquation((prev) => (prev += ")"));
@@ -52,10 +49,22 @@ const Caclulator = () => {
               fontWeight: "500",
               aspectRatio: "1/1",
               borderRadius: "100px",
+              opacity: ["( )", "%", "÷", "×", "−", "+", "⌫"].includes(
+                key as string,
+              )
+                ? "85%"
+                : "100%",
             }}
           />
         ))}
       </div>
+      {totalPaymentAmount > 0 && (
+        <UPIPaymentPopup
+          upiId={upiId}
+          amount={totalPaymentAmount}
+          handleClose={() => setTotalPaymentAmount(0)}
+        />
+      )}
     </div>
   );
 };
@@ -99,6 +108,7 @@ const calculate = (
   equation: string,
   setEquation: React.Dispatch<React.SetStateAction<string>>,
   addBill: (bill: bill) => void,
+  setTotalPaymentAmount: Dispatch<SetStateAction<number>>,
 ) => {
   try {
     const evaluableEquation = equation
@@ -107,6 +117,12 @@ const calculate = (
       .replace(/−/g, "-");
 
     const total = eval(evaluableEquation);
+
+    if (total > 1000000) {
+      return window.alert("Amount above ₹10L cannot be recieved on upi");
+    }
+
+    setTotalPaymentAmount(total);
 
     const listItems: string[] = [];
     const deductions: string[] = [];

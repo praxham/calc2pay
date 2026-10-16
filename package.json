@@ -11,10 +11,15 @@
   "dependencies": {
     "bun-plugin-tailwind": "latest",
     "crypto-js": "^4.2.0",
+    "html2canvas": "^1.4.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19",
     "react-dom": "^19",
     "react-router-dom": "^7.18.4",
+    "react-to-print": "^3.3.0",
+    "react-toastify": "^11.1.0",
     "tailwindcss": "^4",
+    "tesseract.js": "^7.0.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

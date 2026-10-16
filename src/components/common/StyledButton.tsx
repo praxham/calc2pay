@@ -14,7 +14,7 @@ const StyledButton = ({
         isLoading
           ? "bg-gray-400"
           : heirarchy === "primary"
-            ? "  bg-(--clr-primary)"
+            ? "text-white  bg-(--clr-primary)"
             : "  bg-(--clr-grey-one) hover:bg-(--clr-grey-two)"
       } ${length === "full-width" ? "w-full" : "w-fit"}`}
       onClick={action}

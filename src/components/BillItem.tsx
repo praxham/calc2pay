@@ -1,5 +1,7 @@
 import type { bill } from "@/types";
 import StyledButton from "./common/StyledButton";
+import { printBill } from "@/functions/printBill";
+import { useUPIIdStore } from "@/store";
 
 const BillItem = ({
   bill,
@@ -8,8 +10,10 @@ const BillItem = ({
   bill: bill;
   setBillToDelete: (id: string) => void;
 }) => {
+  const upiId = useUPIIdStore((state) => state.upiId);
+
   return (
-    <div className="bg-(--clr-grey-one) rounded-(--corner-radius) p-2">
+    <div className="bg-(--clr-grey-one)/40 rounded-(--corner-radius) p-2">
       {bill?.items?.map((item, index) => (
         <li className=" list-none text-gray-200 flex flex-row items-center justify-between">
           <span>item {index + 1}</span>
@@ -29,7 +33,7 @@ const BillItem = ({
       <div className="flex flex-row gap-2 items-center mt-2">
         <StyledButton
           title="Print"
-          action={() => {}}
+          action={() => printBill(bill, upiId)}
           heirarchy="primary"
           length="full-width"
         />
