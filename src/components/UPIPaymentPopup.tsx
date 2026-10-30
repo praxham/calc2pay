@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import StyledButton from "./common/StyledButton";
 import { createWorker, type Worker, PSM } from "tesseract.js";
 import { useUserDetailsStore } from "@/store";
-import html2canvas from "html2canvas";
 import { toast } from "react-toastify";
 
 const UPIPaymentPopup = ({
@@ -29,43 +28,45 @@ const UPIPaymentPopup = ({
     if (!qrRef.current) return;
 
     try {
-      const canvas = await html2canvas(qrRef.current, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-      });
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-
-        const file = new File([blob], "upi-payment.png", { type: "image/png" });
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      const paymentLinkBody = {
+        pa: upiId,
+        pn: storeName,
+        am: amount,
+        tn: storeName ? `Paying to ${storeName}` : undefined,
+      };
+      console.log("hi");
+      const response = await fetch(
+        "https://miv-pay.vercel.app/api/generate-link",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(paymentLinkBody),
+        },
+      );
+      const result = await response.json();
+      const link = result.data.link;
+      if (result.success && link) {
+        if (navigator.canShare && navigator.canShare({ url: link })) {
           try {
             await navigator.share({
-              title: "Share to UPI app and Pay",
-              text: "Share this to your UPI app to make the payment.",
-              files: [file],
+              title: "Share payment link",
+              text: "Share this to person you want to receive payment from.",
+              url: link,
             });
           } catch (error) {
-            console.error("Error sharing payment request:", error);
+            console.error("Error sharing payment link:", error);
           }
         } else {
-          const imageUrl = URL.createObjectURL(blob);
-          const downloadLink = document.createElement("a");
-
-          downloadLink.href = imageUrl;
-          downloadLink.download = "upi-payment.png";
-
-          document.body.appendChild(downloadLink);
-          downloadLink.click();
-          document.body.removeChild(downloadLink);
-          URL.revokeObjectURL(imageUrl);
-
-          toast.info(
-            "Image downloaded. Your browser does not support direct sharing.",
-          );
+          try {
+            await navigator.clipboard.writeText(link);
+            toast.success("Payment link copied to clipboard!");
+          } catch (error) {
+            console.error("Failed to copy link to clipboard:", error);
+          }
         }
-      }, "image/png");
+      }
     } catch (error) {
       console.error("Failed to generate image:", error);
       toast.error("Failed to generate image for sharing.");
@@ -111,9 +112,9 @@ const UPIPaymentPopup = ({
               size={500}
               style={{ width: "100%", height: "auto", maxWidth: "250px" }}
             />
-            <div className="absolute top-[50%] left-[50%] transform-[translate(-50%,-50%)] text-[4rem] font-bold text-black [text-shadow:-4px_-4px_0_#fff,4px_-4px_0_#fff,-4px_4px_0_#fff,4px_4px_0_#fff]">
-              ₹{makeAmountReadable(amount)}
-            </div>
+            {/* <div className="absolute top-[50%] left-[50%] transform-[translate(-50%,-50%)] text-[4rem] font-bold text-black [text-shadow:-4px_-4px_0_#fff,4px_-4px_0_#fff,-4px_4px_0_#fff,4px_4px_0_#fff]">
+              ₹{readableAmount(amount)}
+            </div> */}
           </div>
           <label className="w-fit font-medium hidden md:block">
             Scan and Pay via any UPI app
@@ -122,7 +123,7 @@ const UPIPaymentPopup = ({
             Share to UPI app and Pay
           </label>
         </div>
-        <div className="w-full md:hidden">
+        <div className="w-full">
           <StyledButton
             title="Share QR"
             action={handleShareQR}
@@ -154,14 +155,11 @@ const UPIPaymentPopup = ({
   );
 };
 
-const makeAmountReadable = (amount: number) => {
-  const stringAmount = amount.toString();
-  if (stringAmount.length === 4 || stringAmount.length === 5) {
-    return amount / 1000 + "K";
-  } else if (stringAmount.length === 6 || stringAmount.length === 7) {
-    return amount / 100000 + "L";
-  }
-  return stringAmount;
+export const readableAmount = (rawAmount: number): string => {
+  const amount = rawAmount.toString();
+  if (!amount || isNaN(Number(amount))) return amount;
+
+  return new Intl.NumberFormat("en-IN").format(Number(amount));
 };
 
 let workerPromise: Promise<Worker> | null = null;

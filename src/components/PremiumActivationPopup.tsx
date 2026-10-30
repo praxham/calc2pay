@@ -37,7 +37,8 @@ const PremiumActivationPopup = ({
             ))}
           </ul>
           <StyledButton
-            title="Buy Premium For ₹999"
+            // removing price since features are not that many now
+            title="Buy Premium"
             action={() =>
               window.open(
                 "https://madeinvikhroli.com/artifacts/calc-2-pay-premium/?purchase=true",
@@ -87,8 +88,8 @@ const premiumFeatures = [
   "Add your store name to payment links so customers see your brand when paying.",
 
   "Save up to 5 different UPI accounts to easily switch between where you receive money.",
-
-  `Get instant voice alerts ("Payment received") the moment a customer's payment is successful.`,
+  // screenrecord not working in mobile web browser
+  // `Get instant voice alerts ("Payment received") the moment a customer's payment is successful.`,
 ];
 
 const validateProductKey = (

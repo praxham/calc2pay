@@ -116,7 +116,7 @@ const calculate = (
       .replace(/÷/g, "/")
       .replace(/−/g, "-");
 
-    const total = eval(evaluableEquation);
+    const total = Number(eval(evaluableEquation).toFixed(2));
 
     if (total > 1000000) {
       return window.alert("Amount above ₹10L cannot be recieved on upi");
